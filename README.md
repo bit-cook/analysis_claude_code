@@ -6,6 +6,8 @@
 
 [中文文档](./README_zh.md)
 
+> This repository was previously used to publish speculative analysis of Claude Code's internals, which contained inaccuracies and overstepped boundaries. We apologize to Anthropic and the community. All such content has been removed and replaced with original educational material.
+
 > Works with **[Kode CLI](https://github.com/shareAI-lab/Kode)**, **Claude Code**, **Cursor**, and any agent supporting the [Agent Skills Spec](https://github.com/anthropics/agent-skills).
 
 <img height="400" alt="demo" src="https://github.com/user-attachments/assets/0e1e31f8-064f-4908-92ce-121e2eb8d453" />
