@@ -1,1 +1,0 @@
-受到这个仓库的启发：https://github.com/Yuyz0112/claude-code-reverse
