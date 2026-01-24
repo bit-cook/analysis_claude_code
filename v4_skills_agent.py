@@ -84,14 +84,10 @@ import sys
 import time
 from pathlib import Path
 
+from anthropic import Anthropic
 from dotenv import load_dotenv
 
-load_dotenv()
-
-try:
-    from provider_utils import get_client, get_model
-except ImportError:
-    sys.exit("Error: provider_utils.py not found. Please ensure you are in the project root.")
+load_dotenv(override=True)
 
 
 # =============================================================================
@@ -101,8 +97,8 @@ except ImportError:
 WORKDIR = Path.cwd()
 SKILLS_DIR = WORKDIR / "skills"
 
-client = get_client()
-MODEL = get_model()
+client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
+MODEL = os.getenv("MODEL_ID", "claude-sonnet-4-5-20250929")
 
 
 # =============================================================================
