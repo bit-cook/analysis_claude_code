@@ -89,11 +89,17 @@ NAG_REMINDER = "<reminder>10+ turns without todo. Please update.</reminder>"
 Injected as context, not commands:
 
 ```python
+# INITIAL_REMINDER: at conversation start (in main)
+if first_message:
+    inject_reminder(INITIAL_REMINDER)
+
+# NAG_REMINDER: inside agent_loop, during task execution
 if rounds_without_todo > 10:
     inject_reminder(NAG_REMINDER)
 ```
 
-The model sees them but doesn't respond to them.
+Key insight: NAG_REMINDER is injected **inside the agent loop**, so the model
+sees it during long-running tasks, not just between tasks.
 
 ## The Feedback Loop
 

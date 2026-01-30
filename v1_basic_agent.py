@@ -51,16 +51,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+from anthropic import Anthropic
 from dotenv import load_dotenv
 
-# Load configuration from .env file
-load_dotenv()
-
-# Import unified client provider
-try:
-    from provider_utils import get_client, get_model
-except ImportError:
-    sys.exit("Error: provider_utils.py not found. Please ensure you are in the project root.")
+load_dotenv(override=True)
 
 
 # =============================================================================
@@ -68,8 +62,8 @@ except ImportError:
 # =============================================================================
 
 WORKDIR = Path.cwd()
-MODEL = get_model()
-client = get_client()
+MODEL = os.getenv("MODEL_ID", "claude-sonnet-4-5-20250929")
+client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
 
 
 # =============================================================================

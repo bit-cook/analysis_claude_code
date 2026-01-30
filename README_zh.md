@@ -1,14 +1,18 @@
-# Learn Claude Code
+# Learn Claude Code - Bash 就是 Agent 的一切
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://github.com/shareAI-lab/learn-claude-code/actions/workflows/test.yml/badge.svg)](https://github.com/shareAI-lab/learn-claude-code/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
 > **声明**: 这是 [shareAI Lab](https://github.com/shareAI-lab) 的独立教育项目，与 Anthropic 无关，未获其认可或赞助。"Claude Code" 是 Anthropic 的商标。
 
 **从零开始构建你自己的 AI Agent。**
 
-[English](./README.md)
+[English](./README.md) | [Japanese / 日本語](./README_ja.md)
 
 ---
 
-**致读者：**
+## 为什么有这个仓库？
 
 这个仓库源于我们对 Claude Code 的敬佩 - **我们认为它是世界上最优秀的 AI 编程代理**。最初，我们试图通过行为观察和推测来逆向分析它的设计。然而，我们当时发布的分析内容充斥着不准确的信息、缺乏依据的猜测和技术错误。我们在此向 Claude Code 团队以及所有被这些内容误导的朋友深表歉意。
 
@@ -20,35 +24,65 @@
 
 <img height="400" alt="demo" src="https://github.com/user-attachments/assets/0e1e31f8-064f-4908-92ce-121e2eb8d453" />
 
-## 这是什么？
+## 你将学到什么
 
-一个渐进式教程，揭开 Kode、Claude Code、Cursor Agent 等 AI Agent 的神秘面纱。
+完成本教程后，你将理解：
 
-**5 个版本，总共约 1100 行，每个版本只添加一个概念：**
+- **Agent 循环** - 所有 AI 编程代理背后那个令人惊讶的简单模式
+- **工具设计** - 如何让 AI 模型能够与真实世界交互
+- **显式规划** - 使用约束让 AI 行为可预测
+- **上下文管理** - 通过子代理隔离保持代理记忆干净
+- **知识注入** - 按需加载领域专业知识，无需重新训练
 
-| 版本 | 行数 | 新增内容 | 核心洞察 |
-|------|------|---------|---------|
-| [v0](./v0_bash_agent.py) | ~50 | 1 个 bash 工具 | Bash 就是一切 |
-| [v1](./v1_basic_agent.py) | ~200 | 4 个核心工具 | 模型即代理 |
-| [v2](./v2_todo_agent.py) | ~300 | Todo 追踪 | 显式规划 |
-| [v3](./v3_subagent.py) | ~450 | 子代理 | 分而治之 |
-| [v4](./v4_skills_agent.py) | ~550 | Skills | 按需领域专业 |
+## 学习路径
+
+```
+从这里开始
+    |
+    v
+[v0: Bash Agent] -----> "一个工具就够了"
+    |                    16-50 行
+    v
+[v1: Basic Agent] ----> "完整的 Agent 模式"
+    |                    4 个工具，~200 行
+    v
+[v2: Todo Agent] -----> "让计划显式化"
+    |                    +TodoManager，~300 行
+    v
+[v3: Subagent] -------> "分而治之"
+    |                    +Task 工具，~450 行
+    v
+[v4: Skills Agent] ---> "按需领域专业"
+                         +Skill 工具，~550 行
+```
+
+**推荐学习方式：**
+1. 先阅读并运行 v0 - 理解核心循环
+2. 对比 v0 和 v1 - 看工具如何演进
+3. 学习 v2 的规划模式
+4. 探索 v3 的复杂任务分解
+5. 掌握 v4 构建可扩展的 Agent
 
 ## 快速开始
 
 ```bash
-pip install anthropic python-dotenv
+# 克隆仓库
+git clone https://github.com/shareAI-lab/learn-claude-code
+cd learn-claude-code
 
-# 配置 API
+# 安装依赖
+pip install -r requirements.txt
+
+# 配置 API Key
 cp .env.example .env
-# 编辑 .env 填入你的 API key
+# 编辑 .env 填入你的 ANTHROPIC_API_KEY
 
 # 运行任意版本
-python v0_bash_agent.py  # 极简版
-python v1_basic_agent.py # 核心 Agent 循环
-python v2_todo_agent.py  # + Todo 规划
-python v3_subagent.py    # + 子代理
-python v4_skills_agent.py # + Skills
+python v0_bash_agent.py      # 极简版（从这里开始！）
+python v1_basic_agent.py     # 核心 Agent 循环
+python v2_todo_agent.py      # + Todo 规划
+python v3_subagent.py        # + 子代理
+python v4_skills_agent.py    # + Skills
 ```
 
 ## 核心模式
@@ -66,6 +100,16 @@ while True:
 
 就这样。模型持续调用工具直到完成。其他一切都是精化。
 
+## 版本对比
+
+| 版本 | 行数 | 工具 | 核心新增 | 关键洞察 |
+|------|------|------|---------|---------|
+| [v0](./v0_bash_agent.py) | ~50 | bash | 递归子代理 | 一个工具就够了 |
+| [v1](./v1_basic_agent.py) | ~200 | bash, read, write, edit | 核心循环 | 模型即代理 |
+| [v2](./v2_todo_agent.py) | ~300 | +TodoWrite | 显式规划 | 约束赋能复杂性 |
+| [v3](./v3_subagent.py) | ~450 | +Task | 上下文隔离 | 干净上下文 = 更好结果 |
+| [v4](./v4_skills_agent.py) | ~550 | +Skill | 知识加载 | 专业无需重训 |
+
 ## 文件结构
 
 ```
@@ -76,21 +120,51 @@ learn-claude-code/
 ├── v2_todo_agent.py       # ~300 行: + TodoManager
 ├── v3_subagent.py         # ~450 行: + Task 工具，代理注册表
 ├── v4_skills_agent.py     # ~550 行: + Skill 工具，SkillLoader
-├── skills/                # 示例 Skills（用于学习）
-└── docs/                  # 详细文档 (中英双语)
+├── skills/                # 示例 Skills（pdf, code-review, mcp-builder, agent-builder）
+├── docs/                  # 技术文档（中英双语）
+├── articles/              # 公众号风格文章
+└── tests/                 # 单元测试和集成测试
 ```
 
-## 使用 Agent Builder Skill
+## 深入阅读
 
-本仓库包含一个元技能，教 Agent 如何构建 Agent：
+### 技术文档 (docs/)
+
+- [v0: Bash 就是一切](./docs/v0-Bash就是一切.md)
+- [v1: 模型即代理](./docs/v1-模型即代理.md)
+- [v2: 结构化规划](./docs/v2-结构化规划.md)
+- [v3: 子代理机制](./docs/v3-子代理机制.md)
+- [v4: Skills 机制](./docs/v4-Skills机制.md)
+
+### 原创文章 (articles/)
+
+- [v0文章](./articles/v0文章.md) - Bash 就是一切
+- [v1文章](./articles/v1文章.md) - 价值 3000 万美金的 400 行代码
+- [v2文章](./articles/v2文章.md) - 用 Todo 实现自我约束
+- [v3文章](./articles/v3文章.md) - 子代理机制
+- [v4文章](./articles/v4文章.md) - Skills 机制
+- [上下文缓存经济学](./articles/上下文缓存经济学.md) - Agent 开发者必知的成本优化
+
+## 使用 Skills 系统
+
+### 内置示例 Skills
+
+| Skill | 用途 |
+|-------|------|
+| [agent-builder](./skills/agent-builder/) | 元技能：如何构建 Agent |
+| [code-review](./skills/code-review/) | 系统化代码审查方法论 |
+| [pdf](./skills/pdf/) | PDF 操作模式 |
+| [mcp-builder](./skills/mcp-builder/) | MCP 服务器开发 |
+
+### 脚手架生成新 Agent
 
 ```bash
-# 脚手架生成新 Agent 项目
+# 使用 agent-builder skill 创建新项目
 python skills/agent-builder/scripts/init_agent.py my-agent
 
-# 或指定复杂度级别
+# 指定复杂度级别
 python skills/agent-builder/scripts/init_agent.py my-agent --level 0  # 极简
-python skills/agent-builder/scripts/init_agent.py my-agent --level 1  # 4 工具 (默认)
+python skills/agent-builder/scripts/init_agent.py my-agent --level 1  # 4 工具
 ```
 
 ### 生产环境安装 Skills
@@ -103,65 +177,36 @@ kode plugins install https://github.com/shareAI-lab/shareAI-skills
 claude plugins install https://github.com/shareAI-lab/shareAI-skills
 ```
 
-详见 [shareAI-skills](https://github.com/shareAI-lab/shareAI-skills) 获取完整的生产就绪 skills 集合。
+## 配置说明
 
-## 核心概念
-
-### v0: Bash 就是一切
-一个工具。递归自调用实现子代理。证明核心是极小的。
-
-### v1: 模型即代理
-4 个工具 (bash, read, write, edit)。完整 Agent 在一个函数里。
-
-### v2: 结构化规划
-Todo 工具让计划显式化。约束赋能复杂任务。
-
-### v3: 子代理机制
-Task 工具生成隔离的子代理。上下文保持干净。
-
-### v4: Skills 机制
-SKILL.md 文件按需提供领域专业知识。知识作为一等公民。
-
-## 深入阅读
-
-**技术教程 (docs/):**
-
-| English | 中文 |
-|---------|------|
-| [v0: Bash is All You Need](./docs/v0-bash-is-all-you-need.md) | [v0: Bash 就是一切](./docs/v0-Bash就是一切.md) |
-| [v1: Model as Agent](./docs/v1-model-as-agent.md) | [v1: 模型即代理](./docs/v1-模型即代理.md) |
-| [v2: Structured Planning](./docs/v2-structured-planning.md) | [v2: 结构化规划](./docs/v2-结构化规划.md) |
-| [v3: Subagent Mechanism](./docs/v3-subagent-mechanism.md) | [v3: 子代理机制](./docs/v3-子代理机制.md) |
-| [v4: Skills Mechanism](./docs/v4-skills-mechanism.md) | [v4: Skills 机制](./docs/v4-Skills机制.md) |
-
-**原创文章 (articles/) - 公众号风格:**
-- [v0文章](./articles/v0文章.md) | [v1文章](./articles/v1文章.md) | [v2文章](./articles/v2文章.md) | [v3文章](./articles/v3文章.md) | [v4文章](./articles/v4文章.md)
-- [上下文缓存经济学](./articles/上下文缓存经济学.md) - Agent 开发者必知的成本优化指南
+```bash
+# .env 文件选项
+ANTHROPIC_API_KEY=sk-ant-xxx      # 必需：你的 API key
+ANTHROPIC_BASE_URL=https://...    # 可选：API 代理
+MODEL_ID=claude-sonnet-4-5-20250929  # 可选：模型选择
+```
 
 ## 相关项目
 
-| 仓库 | 用途 |
+| 仓库 | 说明 |
 |------|------|
-| [Kode](https://github.com/shareAI-lab/Kode) | 全功能开源 Agent CLI（生产环境） |
-| [shareAI-skills](https://github.com/shareAI-lab/shareAI-skills) | 生产就绪的 AI Agent Skills |
+| [Kode](https://github.com/shareAI-lab/Kode) | 生产就绪的开源 Agent CLI |
+| [shareAI-skills](https://github.com/shareAI-lab/shareAI-skills) | 生产 Skills 集合 |
 | [Agent Skills Spec](https://github.com/anthropics/agent-skills) | 官方规范 |
-
-### 作为模板
-
-Fork 并自定义为你自己的 Agent 项目：
-
-```bash
-git clone https://github.com/shareAI-lab/learn-claude-code
-cd learn-claude-code
-# 从任意版本级别开始
-cp v1_basic_agent.py my_agent.py
-```
 
 ## 设计哲学
 
-> 模型是 80%，代码是 20%。
+> **模型是 80%，代码是 20%。**
 
 Kode 和 Claude Code 等现代 Agent 能工作，不是因为巧妙的工程，而是因为模型被训练成了 Agent。我们的工作就是给它工具，然后闪开。
+
+## 贡献
+
+欢迎贡献！请随时提交 issues 和 pull requests。
+
+- 在 `skills/` 中添加新的示例 skills
+- 在 `docs/` 中改进文档
+- 通过 [Issues](https://github.com/shareAI-lab/learn-claude-code/issues) 报告 bug 或建议功能
 
 ## License
 
@@ -171,4 +216,4 @@ MIT
 
 **模型即代理。这就是全部秘密。**
 
-[@baicai003](https://x.com/baicai003)
+[@baicai003](https://x.com/baicai003) | [shareAI Lab](https://github.com/shareAI-lab)
