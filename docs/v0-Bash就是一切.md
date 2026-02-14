@@ -114,4 +114,4 @@ while True:
 
 **Bash 就是一切。**
 
-[← 返回 README](../README_zh.md)
+[← 返回 README](../README_zh.md) | [v1 →](./v1-模型即代理.md)

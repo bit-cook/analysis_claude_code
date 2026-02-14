@@ -33,6 +33,10 @@
 - **明示的な計画** - 制約を使ってAIの動作を予測可能にする
 - **コンテキスト管理** - サブエージェントの分離によりエージェントのメモリをクリーンに保つ
 - **知識注入** - 再学習なしでドメイン専門知識をオンデマンドで読み込む
+- **コンテキスト圧縮** - コンテキストウィンドウの限界を超えてエージェントが作業する方法
+- **タスクシステム** - 個人メモからチームプロジェクトボードへ
+- **並列実行** - バックグラウンドタスクと通知駆動ワークフロー
+- **マルチエージェント協調** - 永続的なチームメイトによる並列作業
 
 ## 学習パス
 
@@ -40,20 +44,32 @@
 ここから始める
     |
     v
-[v0: Bash Agent] -----> 「1つのツールで十分」
-    |                    16-50行
+[v0: Bash Agent] ----------> 「1つのツールで十分」
+    |                         16-50行
     v
-[v1: Basic Agent] ----> 「完全なエージェントパターン」
-    |                    4ツール、約200行
+[v1: Basic Agent] ----------> 「完全なエージェントパターン」
+    |                          4ツール、約200行
     v
-[v2: Todo Agent] -----> 「計画を明示化する」
-    |                    +TodoManager、約300行
+[v2: Todo Agent] -----------> 「計画を明示化する」
+    |                          +TodoManager、約300行
     v
-[v3: Subagent] -------> 「分割統治」
-    |                    +Taskツール、約450行
+[v3: Subagent] -------------> 「分割統治」
+    |                          +Taskツール、約450行
     v
-[v4: Skills Agent] ---> 「オンデマンドのドメイン専門性」
-                         +Skillツール、約550行
+[v4: Skills Agent] ----------> 「オンデマンドのドメイン専門性」
+    |                           +Skillツール、約550行
+    v
+[v5: Compression Agent] ----> 「忘れない、永遠に作業」
+    |                          +ContextManager、約650行
+    v
+[v6: Tasks Agent] ----------> 「付箋からカンバンへ」
+    |                          +TaskManager、約750行
+    v
+[v7: Background Agent] -----> 「待たない、作業を続ける」
+    |                          +BackgroundManager、約850行
+    v
+[v8: Teammate Agent] -------> 「エージェントのチーム」
+                               +TeammateManager、約1000行
 ```
 
 **おすすめの学習方法：**
@@ -62,6 +78,10 @@
 3. v2で計画パターンを学ぶ
 4. v3で複雑なタスク分解を探求する
 5. v4で拡張可能なエージェント構築をマスターする
+6. v5でコンテキスト管理と圧縮を学ぶ
+7. v6で永続的なタスク追跡を探求する
+8. v7で並列バックグラウンド実行を理解する
+9. v8でマルチエージェントチーム協調をマスターする
 
 ## クイックスタート
 
@@ -78,11 +98,15 @@ cp .env.example .env
 # .env を編集して ANTHROPIC_API_KEY を入力
 
 # 任意のバージョンを実行
-python v0_bash_agent.py      # 最小限（ここから始めよう！）
-python v1_basic_agent.py     # コアエージェントループ
-python v2_todo_agent.py      # + Todo計画
-python v3_subagent.py        # + サブエージェント
-python v4_skills_agent.py    # + Skills
+python v0_bash_agent.py         # 最小限（ここから始めよう！）
+python v1_basic_agent.py        # コアエージェントループ
+python v2_todo_agent.py         # + Todo計画
+python v3_subagent.py           # + サブエージェント
+python v4_skills_agent.py       # + Skills
+python v5_compression_agent.py  # + コンテキスト圧縮
+python v6_tasks_agent.py        # + タスクシステム
+python v7_background_agent.py   # + バックグラウンドタスク
+python v8_teammate_agent.py     # + チーム協調
 ```
 
 ## コアパターン
@@ -109,21 +133,58 @@ while True:
 | [v2](./v2_todo_agent.py) | ~300 | +TodoWrite | 明示的計画 | 制約が複雑さを可能にする |
 | [v3](./v3_subagent.py) | ~450 | +Task | コンテキスト分離 | クリーンなコンテキスト = より良い結果 |
 | [v4](./v4_skills_agent.py) | ~550 | +Skill | 知識読み込み | 再学習なしの専門性 |
+| [v5](./v5_compression_agent.py) | ~650 | +ContextManager | 3層圧縮 | 忘却が無限作業を可能にする |
+| [v6](./v6_tasks_agent.py) | ~750 | +TaskCreate/Get/Update/List | 永続タスク | 付箋からカンバンへ |
+| [v7](./v7_background_agent.py) | ~850 | +TaskOutput/TaskStop | バックグラウンド実行 | 直列から並列へ |
+| [v8](./v8_teammate_agent.py) | ~1000 | +TeamCreate/SendMessage/TeamDelete | 永続チームメイト | 命令から協調へ |
+
+## サブメカニズムガイド
+
+各バージョンは1つのコアクラスを導入しますが、本当の学びはサブメカニズムにあります。この表で具体的な概念を見つけられます：
+
+| サブメカニズム | バージョン | キーコード | 学ぶこと |
+|----------------|------------|------------|----------|
+| **エージェントループ** | v0-v1 | `agent_loop()` | `while tool_use` ループパターン |
+| **ツールディスパッチ** | v1 | `process_tool_call()` | tool_useブロックから関数へのマッピング |
+| **明示的計画** | v2 | `TodoManager` | 単一`in_progress`制約、system reminder |
+| **コンテキスト分離** | v3 | `run_subagent()` | サブエージェントごとの独立メッセージリスト |
+| **ツールフィルタリング** | v3 | `AGENT_TYPES` | Exploreエージェントは読み取り専用ツールのみ |
+| **スキル注入** | v4 | `SkillLoader` | コンテンツをsystem promptに前置 |
+| **マイクロコンパクト** | v5 | `ContextManager.microcompact()` | 古いツール出力をプレースホルダーに置換 |
+| **自動コンパクト** | v5 | `ContextManager.auto_compact()` | 93%閾値でAPI要約を実行 |
+| **大出力処理** | v5 | `ContextManager.handle_large_output()` | 40Kトークン超はディスク保存、プレビュー返却 |
+| **トランスクリプト永続化** | v5 | `ContextManager.save_transcript()` | 完全な履歴を`.jsonl`に追記 |
+| **タスクCRUD** | v6 | `TaskManager` | create/get/update/list + JSON永続化 |
+| **依存関係グラフ** | v6 | `addBlocks/addBlockedBy` | 完了時に下流タスクを自動アンブロック |
+| **バックグラウンド実行** | v7 | `BackgroundManager.run_in_background()` | スレッドベース、即座にtask_id返却 |
+| **IDプレフィックス規約** | v7 | `_PREFIXES` | `b`=bash, `a`=agent（v8で`t`=teammate追加） |
+| **通知バス** | v7 | `drain_notifications()` | 各API呼び出し前にキューをドレイン |
+| **通知注入** | v7 | `<task-notification>` XML | 最後のユーザーメッセージに注入 |
+| **チームメイトライフサイクル** | v8 | `_teammate_loop()` | active -> 作業 -> idle -> 受信箱確認 -> active |
+| **ファイルベース受信箱** | v8 | `send_message()/check_inbox()` | JSONL形式、チームメイトごとのファイル |
+| **メッセージプロトコル** | v8 | `MESSAGE_TYPES` | 5種: message, broadcast, shutdown_req/resp, plan_approval |
+| **ツールスコーピング** | v8 | `TEAMMATE_TOOLS` | チームメイトは8ツール（TeamCreate/Delete なし） |
+| **タスククレーミング** | v8 | `teammate_loop` | アイドルのチームメイトが未割当タスクを自動取得 |
+| **アイデンティティ保持** | v8 | `auto_compact` + identity | 圧縮後にチームメイト名/役割を再注入 |
 
 ## ファイル構造
 
 ```
 learn-claude-code/
-├── v0_bash_agent.py       # ~50行: 1ツール、再帰的サブエージェント
-├── v0_bash_agent_mini.py  # ~16行: 極限圧縮
-├── v1_basic_agent.py      # ~200行: 4ツール、コアループ
-├── v2_todo_agent.py       # ~300行: + TodoManager
-├── v3_subagent.py         # ~450行: + Taskツール、エージェントレジストリ
-├── v4_skills_agent.py     # ~550行: + Skillツール、SkillLoader
-├── skills/                # サンプルSkills（pdf, code-review, mcp-builder, agent-builder）
-├── docs/                  # 技術ドキュメント（EN + ZH + JA）
-├── articles/              # ブログ形式の記事（ZH）
-└── tests/                 # ユニットテストと統合テスト
+├── v0_bash_agent.py          # ~50行: 1ツール、再帰的サブエージェント
+├── v0_bash_agent_mini.py     # ~16行: 極限圧縮
+├── v1_basic_agent.py         # ~200行: 4ツール、コアループ
+├── v2_todo_agent.py          # ~300行: + TodoManager
+├── v3_subagent.py            # ~450行: + Taskツール、エージェントレジストリ
+├── v4_skills_agent.py        # ~550行: + Skillツール、SkillLoader
+├── v5_compression_agent.py   # ~650行: + ContextManager、3層圧縮
+├── v6_tasks_agent.py         # ~750行: + TaskManager、依存関係付きCRUD
+├── v7_background_agent.py    # ~850行: + BackgroundManager、並列実行
+├── v8_teammate_agent.py      # ~1000行: + TeammateManager、チーム協調
+├── skills/                   # サンプルSkills（pdf, code-review, mcp-builder, agent-builder）
+├── docs/                     # 技術ドキュメント（EN + ZH + JA）
+├── articles/                 # ブログ形式の記事（ZH）
+└── tests/                    # ユニット、機能、統合テスト
 ```
 
 ## ドキュメント
@@ -135,6 +196,10 @@ learn-claude-code/
 - [v2: 構造化プランニング](./docs/v2-構造化プランニング.md)
 - [v3: サブエージェント機構](./docs/v3-サブエージェント.md)
 - [v4: スキル機構](./docs/v4-スキル機構.md)
+- [v5: コンテキスト圧縮](./docs/v5-コンテキスト圧縮.md)
+- [v6: タスクシステム](./docs/v6-タスクシステム.md)
+- [v7: バックグラウンドタスク](./docs/v7-バックグラウンドタスク.md)
+- [v8: チームメイト機構](./docs/v8-チームメイト機構.md)
 
 ### 記事
 

@@ -48,7 +48,6 @@ Usage:
 
 import os
 import subprocess
-import sys
 from pathlib import Path
 
 from anthropic import Anthropic
@@ -60,6 +59,11 @@ load_dotenv(override=True)
 # =============================================================================
 # Configuration
 # =============================================================================
+
+# When using third-party endpoints (e.g. GLM), clear ANTHROPIC_AUTH_TOKEN
+# to prevent the SDK from sending a conflicting authorization header.
+if os.getenv("ANTHROPIC_BASE_URL"):
+    os.environ.pop("ANTHROPIC_AUTH_TOKEN", None)
 
 WORKDIR = Path.cwd()
 MODEL = os.getenv("MODEL_ID", "claude-sonnet-4-5-20250929")

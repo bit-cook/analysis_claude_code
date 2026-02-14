@@ -89,6 +89,11 @@ load_dotenv(override=True)
 # Configuration
 # =============================================================================
 
+# When using third-party endpoints (e.g. GLM), clear ANTHROPIC_AUTH_TOKEN
+# to prevent the SDK from sending a conflicting authorization header.
+if os.getenv("ANTHROPIC_BASE_URL"):
+    os.environ.pop("ANTHROPIC_AUTH_TOKEN", None)
+
 WORKDIR = Path.cwd()
 
 client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
@@ -139,7 +144,7 @@ def get_agent_descriptions() -> str:
 # =============================================================================
 
 class TodoManager:
-    """Task list manager with constraints. See v2 for details."""
+    """Task list manager with constraints (max 20 items, single in_progress)."""
 
     def __init__(self):
         self.items = []

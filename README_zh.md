@@ -33,6 +33,10 @@
 - **显式规划** - 使用约束让 AI 行为可预测
 - **上下文管理** - 通过子代理隔离保持代理记忆干净
 - **知识注入** - 按需加载领域专业知识，无需重新训练
+- **上下文压缩** - 让 Agent 突破上下文窗口限制持续工作
+- **任务系统** - 从个人便签到团队看板
+- **并行执行** - 后台任务与通知驱动的工作流
+- **多 Agent 协作** - 持久化队友并行工作
 
 ## 学习路径
 
@@ -53,7 +57,19 @@
     |                    +Task 工具，~450 行
     v
 [v4: Skills Agent] ---> "按需领域专业"
-                         +Skill 工具，~550 行
+    |                    +Skill 工具，~550 行
+    v
+[v5: Compression] ----> "永不遗忘，永续工作"
+    |                    +ContextManager，~650 行
+    v
+[v6: Tasks Agent] ----> "从便利贴到看板"
+    |                    +TaskManager，~750 行
+    v
+[v7: Background] -----> "不等结果，继续干活"
+    |                    +BackgroundManager，~850 行
+    v
+[v8: Teammate] -------> "一群 Agent 无所不能"
+                         +TeammateManager，~1000 行
 ```
 
 **推荐学习方式：**
@@ -62,6 +78,10 @@
 3. 学习 v2 的规划模式
 4. 探索 v3 的复杂任务分解
 5. 掌握 v4 构建可扩展的 Agent
+6. 学习 v5 的上下文管理与压缩
+7. 探索 v6 的持久化任务追踪
+8. 理解 v7 的并行后台执行
+9. 掌握 v8 的多 Agent 团队协作
 
 ## 快速开始
 
@@ -81,8 +101,12 @@ cp .env.example .env
 python v0_bash_agent.py      # 极简版（从这里开始！）
 python v1_basic_agent.py     # 核心 Agent 循环
 python v2_todo_agent.py      # + Todo 规划
-python v3_subagent.py        # + 子代理
-python v4_skills_agent.py    # + Skills
+python v3_subagent.py           # + 子代理
+python v4_skills_agent.py       # + Skills
+python v5_compression_agent.py  # + 上下文压缩
+python v6_tasks_agent.py        # + 任务系统
+python v7_background_agent.py   # + 后台任务
+python v8_teammate_agent.py     # + 团队协作
 ```
 
 ## 核心模式
@@ -109,6 +133,39 @@ while True:
 | [v2](./v2_todo_agent.py) | ~300 | +TodoWrite | 显式规划 | 约束赋能复杂性 |
 | [v3](./v3_subagent.py) | ~450 | +Task | 上下文隔离 | 干净上下文 = 更好结果 |
 | [v4](./v4_skills_agent.py) | ~550 | +Skill | 知识加载 | 专业无需重训 |
+| [v5](./v5_compression_agent.py) | ~650 | +ContextManager | 三层压缩 | 遗忘成就无限工作 |
+| [v6](./v6_tasks_agent.py) | ~750 | +TaskCreate/Get/Update/List | 持久化任务 | 便利贴到看板 |
+| [v7](./v7_background_agent.py) | ~850 | +TaskOutput/TaskStop | 后台执行 | 串行到并行 |
+| [v8](./v8_teammate_agent.py) | ~1000 | +TeamCreate/SendMessage/TeamDelete | 持久化队友 | 指令到协作 |
+
+## 子机制导航
+
+每个版本引入一个核心类，但真正的学习在于子机制。此表帮助你定位具体概念：
+
+| 子机制 | 版本 | 关键代码 | 学什么 |
+|--------|------|---------|--------|
+| **Agent 循环** | v0-v1 | `agent_loop()` | `while tool_use` 循环模式 |
+| **工具分发** | v1 | `process_tool_call()` | tool_use 块如何映射到函数 |
+| **显式规划** | v2 | `TodoManager` | 单 `in_progress` 约束、system reminder |
+| **上下文隔离** | v3 | `run_subagent()` | 每个子代理独立消息列表 |
+| **工具过滤** | v3 | `AGENT_TYPES` | Explore 代理只获得只读工具 |
+| **Skill 注入** | v4 | `SkillLoader` | 内容前置到 system prompt |
+| **微压缩** | v5 | `ContextManager.microcompact()` | 旧工具输出替换为占位符 |
+| **自动压缩** | v5 | `ContextManager.auto_compact()` | 93% 阈值触发 API 摘要 |
+| **大输出处理** | v5 | `ContextManager.handle_large_output()` | >40K token 存盘，返回预览 |
+| **记录持久化** | v5 | `ContextManager.save_transcript()` | 完整历史追加到 `.jsonl` |
+| **任务 CRUD** | v6 | `TaskManager` | create/get/update/list + JSON 持久化 |
+| **依赖图** | v6 | `addBlocks/addBlockedBy` | 完成时自动解锁下游任务 |
+| **后台执行** | v7 | `BackgroundManager.run_in_background()` | 线程执行，立即返回 task_id |
+| **ID 前缀约定** | v7 | `_PREFIXES` | `b`=bash, `a`=agent（v8 增加 `t`=teammate） |
+| **通知总线** | v7 | `drain_notifications()` | 每次 API 调用前清空队列 |
+| **通知注入** | v7 | `<task-notification>` XML | 注入到最后一条用户消息 |
+| **Teammate 生命周期** | v8 | `_teammate_loop()` | active -> 工作 -> idle -> 检查邮箱 -> active |
+| **文件邮箱** | v8 | `send_message()/check_inbox()` | JSONL 格式，每个 Teammate 独立文件 |
+| **消息协议** | v8 | `MESSAGE_TYPES` | 5 种：message, broadcast, shutdown_req/resp, plan_approval |
+| **工具权限** | v8 | `TEAMMATE_TOOLS` | Teammate 获得 8 个工具（无 TeamCreate/Delete） |
+| **任务认领** | v8 | `teammate_loop` | 空闲 Teammate 自动认领未分配任务 |
+| **身份保持** | v8 | `auto_compact` + identity | 压缩后重新注入 Teammate 名称/角色 |
 
 ## 文件结构
 
@@ -120,10 +177,14 @@ learn-claude-code/
 ├── v2_todo_agent.py       # ~300 行: + TodoManager
 ├── v3_subagent.py         # ~450 行: + Task 工具，代理注册表
 ├── v4_skills_agent.py     # ~550 行: + Skill 工具，SkillLoader
+├── v5_compression_agent.py # ~650 行: + ContextManager，三层压缩
+├── v6_tasks_agent.py      # ~750 行: + TaskManager，依赖图 CRUD
+├── v7_background_agent.py # ~850 行: + BackgroundManager，并行执行
+├── v8_teammate_agent.py   # ~1000 行: + TeammateManager，团队协作
 ├── skills/                # 示例 Skills（pdf, code-review, mcp-builder, agent-builder）
-├── docs/                  # 技术文档（中英双语）
+├── docs/                  # 技术文档（中英日三语）
 ├── articles/              # 公众号风格文章
-└── tests/                 # 单元测试和集成测试
+└── tests/                 # 单元测试、特性测试和集成测试
 ```
 
 ## 深入阅读
@@ -135,6 +196,10 @@ learn-claude-code/
 - [v2: 结构化规划](./docs/v2-结构化规划.md)
 - [v3: 子代理机制](./docs/v3-子代理机制.md)
 - [v4: Skills 机制](./docs/v4-Skills机制.md)
+- [v5: 上下文压缩](./docs/v5-上下文压缩.md)
+- [v6: Tasks 系统](./docs/v6-Tasks系统.md)
+- [v7: 后台任务与通知 Bus](./docs/v7-后台任务与通知Bus.md)
+- [v8: Teammate 机制](./docs/v8-Teammate机制.md)
 
 ### 原创文章 (articles/)
 
@@ -143,6 +208,10 @@ learn-claude-code/
 - [v2文章](./articles/v2文章.md) - 用 Todo 实现自我约束
 - [v3文章](./articles/v3文章.md) - 子代理机制
 - [v4文章](./articles/v4文章.md) - Skills 机制
+- [v5文章](./articles/v5文章.md) - 三层上下文压缩
+- [v6文章](./articles/v6文章.md) - Tasks 系统
+- [v7文章](./articles/v7文章.md) - 后台任务与通知 Bus
+- [v8文章](./articles/v8文章.md) - Teammate 机制
 - [上下文缓存经济学](./articles/上下文缓存经济学.md) - Agent 开发者必知的成本优化
 
 ## 使用 Skills 系统

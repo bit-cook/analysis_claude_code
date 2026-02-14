@@ -23,8 +23,11 @@ jobs:
       - name: Run unit tests
         run: python tests/test_unit.py
 
-  integration-test:
+  session-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        session: [v0, v1, v2, v3, v4, v5, v6, v7, v8]
     steps:
       - uses: actions/checkout@v6
 
@@ -34,11 +37,11 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install anthropic python-dotenv openai
+        run: pip install anthropic python-dotenv
 
-      - name: Run integration tests
+      - name: Run ${{ matrix.session }} tests
         env:
           TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
           TEST_BASE_URL: ${{ secrets.TEST_BASE_URL }}
           TEST_MODEL: ${{ secrets.TEST_MODEL }}
-        run: python tests/test_agent.py
+        run: python tests/test_${{ matrix.session }}.py
